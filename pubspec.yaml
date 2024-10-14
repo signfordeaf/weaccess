@@ -1,7 +1,15 @@
 name: weaccess
 description: "Accessability app for the visually impaired"
 version: 1.0.0
-homepage:
+email: hello@signfordeaf.com
+homepage: https://github.com/signfordeaf/weaccess
+repository: https://github.com/signfordeaf/weaccess
+topics: 
+  - accessibility
+  - tools
+  - image-description
+  - flutter
+  - mobile
 
 environment:
   sdk: ^3.5.0
