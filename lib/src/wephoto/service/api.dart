@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:tuple/tuple.dart';
 import 'package:weaccess/src/weaccess.dart';
 
 class ApiServices {
@@ -7,7 +10,7 @@ class ApiServices {
 
   var dio = Dio(
     BaseOptions(
-      baseUrl: 'http://68.154.90.84:8081/api/',
+      baseUrl: 'https://pl.weaccess.ai/mobile/api/',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -18,42 +21,41 @@ class ApiServices {
     required String imagePath,
     String dest = 'en',
   }) async {
-    var data = {
+    var data = FormData.fromMap({
       'api_key': _weAccess.apiKey,
       'image_url': imagePath,
-      'dest': dest,
-      'description_type': 'short'
-    };
+      'lang': dest,
+      'create_types': ['alt']
+    });
 
     try {
       var response = await dio.request(
-        'describe-image',
+        'wephoto-create/',
         options: Options(
-          method: 'GET',
+          method: 'POST',
         ),
-        queryParameters: data,
+        data: data,
         cancelToken: _cancelToken,
       );
-
       switch (response.statusCode) {
-        case 200:
-          final outputList = response.data['output'] as List?;
+        case 200 || 201 || 202 || 203 || 204:
+          final outputList = response.data['image_alt_text'] as List?;
           if (outputList != null) {
             return outputList[0] ?? 'No Image Caption available';
           }
           return 'No Image Caption available';
         case 400:
-          return '';
+          return 'No Image Caption available';
         case 401:
-          return '';
+          return 'No Image Caption available';
         case 403:
-          return '';
+          return 'No Image Caption available';
         case 404:
-          return '';
+          return 'No Image Caption available';
         case 500:
-          return '';
+          return 'No Image Caption available';
         default:
-          return '';
+          return 'No Image Caption available';
       }
     } catch (e) {
       if (e is DioException) {
@@ -72,42 +74,99 @@ class ApiServices {
     String dest = 'en',
     String descriptionType = 'long',
   }) async {
-    var data = {
+    var data = FormData.fromMap({
       'api_key': _weAccess.apiKey,
       'image_url': imagePath,
-      'dest': dest,
-      'description_type': descriptionType
-    };
+      'lang': dest,
+      'create_types': ['desc']
+    });
 
     try {
       var response = await dio.request(
-        'describe-image',
+        'wephoto-create/',
         options: Options(
-          method: 'GET',
+          method: 'POST',
         ),
-        queryParameters: data,
+        data: data,
         cancelToken: _cancelToken,
       );
 
       switch (response.statusCode) {
-        case 200:
-          final outputList = response.data['output'] as List?;
+        case 200 || 201 || 202 || 203 || 204:
+          final outputList = response.data['image_desc'] as List?;
           if (outputList != null) {
             return outputList[0] ?? 'No Image Caption available';
           }
           return 'No Image Caption available';
         case 400:
-          return '';
+          return 'No Image Caption available';
         case 401:
-          return '';
+          return 'No Image Caption available';
         case 403:
-          return '';
+          return 'No Image Caption available';
         case 404:
-          return '';
+          return 'No Image Caption available';
         case 500:
-          return '';
+          return 'No Image Caption available';
         default:
-          return '';
+          return 'No Image Caption available';
+      }
+    } catch (e) {
+      throw 'Server error: The server encountered an internal error and was unable to complete the request.';
+    }
+  }
+
+  Future<Tuple2<String, String>> getImageDescriptionFile({
+    required File image,
+    String dest = 'en',
+  }) async {
+    var data = FormData.fromMap({
+      'api_key': _weAccess.apiKey,
+      'lang': dest,
+      'create_types': '["alt", "desc"]',
+    });
+
+    data.files.add(
+      MapEntry(
+        'file',
+        MultipartFile.fromFileSync(
+          image.path,
+        ),
+      ),
+    );
+    try {
+      var response = await dio.request(
+        'wephoto-create/',
+        options: Options(
+          method: 'POST',
+        ),
+        data: data,
+        cancelToken: _cancelToken,
+      );
+      switch (response.statusCode) {
+        case 200 || 201 || 202 || 203 || 204:
+          final altOutputList = response.data['image_alt_text'] as List?;
+          final descOutputList = response.data['image_desc'] as List?;
+          return Tuple2(altOutputList?[0] ?? 'No Image Caption available',
+              descOutputList?[0] ?? 'No Image Caption available');
+        case 400:
+          return const Tuple2(
+              'No Image Caption available', 'No Image Caption available');
+        case 401:
+          return const Tuple2(
+              'No Image Caption available', 'No Image Caption available');
+        case 403:
+          return const Tuple2(
+              'No Image Caption available', 'No Image Caption available');
+        case 404:
+          return const Tuple2(
+              'No Image Caption available', 'No Image Caption available');
+        case 500:
+          return const Tuple2(
+              'No Image Caption available', 'No Image Caption available');
+        default:
+          return const Tuple2(
+              'No Image Caption available', 'No Image Caption available');
       }
     } catch (e) {
       throw 'Server error: The server encountered an internal error and was unable to complete the request.';

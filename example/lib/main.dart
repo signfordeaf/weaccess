@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:weaccess/weaccess.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -17,10 +18,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'WeAccess WePhoto Demo Page',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.tealAccent),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'WeAccess WePhoto Demo Page'),
+      home: const MyHomePage(title: 'WePhoto Image Description'),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -58,8 +60,8 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _wePhotoImage(_imageList[0], _wePhotoController),
-              _wePhotoImage(_imageList[1], _wePhotoController2),
-              _wePhotoImage(_imageList[2], _wePhotoController3),
+              /* _wePhotoImage(_imageList[1], _wePhotoController2),
+              _wePhotoImage(_imageList[2], _wePhotoController3), */
             ],
           ),
         ),
@@ -70,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Column _wePhotoImage(String imageSource, WePhotoController controller) {
     return Column(
       children: [
-        Container(
+        /* Container(
           margin: const EdgeInsets.all(20),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
@@ -86,6 +88,19 @@ class _MyHomePageState extends State<MyHomePage> {
           width: 400,
           child: Text(
             'Semantics Label:\n ${controller.description}',
+          ),
+        ), */
+
+        Container(
+          margin: const EdgeInsets.all(20),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: WePhoto(
+              controller: controller,
+              image: const AssetImage(
+                'assets/image.jpg',
+              ),
+            ),
           ),
         ),
       ],

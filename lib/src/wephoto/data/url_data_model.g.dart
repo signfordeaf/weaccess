@@ -20,19 +20,22 @@ class URLDataModelAdapter extends TypeAdapter<URLDataModel> {
       imageUrl: fields[0] as String,
       shortImageCaption: fields[1] as String?,
       longImageCaption: fields[2] as String?,
+      imageType: fields[3] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, URLDataModel obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.imageUrl)
       ..writeByte(1)
       ..write(obj.shortImageCaption)
       ..writeByte(2)
-      ..write(obj.longImageCaption);
+      ..write(obj.longImageCaption)
+      ..writeByte(3)
+      ..write(obj.imageType);
   }
 
   @override
