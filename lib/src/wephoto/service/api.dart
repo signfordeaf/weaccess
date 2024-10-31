@@ -17,7 +17,7 @@ class ApiServices {
     ),
   );
 
-  Future<String> getImageCaption({
+  Future<Tuple2<String, String>> getImageDescriptionURL({
     required String imagePath,
     String dest = 'en',
   }) async {
@@ -25,7 +25,7 @@ class ApiServices {
       'api_key': _weAccess.apiKey,
       'image_url': imagePath,
       'lang': dest,
-      'create_types': ['alt']
+      'create_types': '["alt", "desc"]',
     });
 
     try {
@@ -39,80 +39,40 @@ class ApiServices {
       );
       switch (response.statusCode) {
         case 200 || 201 || 202 || 203 || 204:
-          final outputList = response.data['image_alt_text'] as List?;
-          if (outputList != null) {
-            return outputList[0] ?? 'No Image Caption available';
+          if (response.data['image_alt_text'] == 'Gateway error' ||
+              response.data['image_desc'] == 'Gateway error') {
+            return const Tuple2(
+                'No Image Caption available', 'No Image Caption available');
           }
-          return 'No Image Caption available';
+          return Tuple2(
+              response.data['image_alt_text'] ?? 'No Image Caption available',
+              response.data['image_desc'] ?? 'No Image Caption available');
         case 400:
-          return 'No Image Caption available';
+          return const Tuple2(
+              'No Image Caption available', 'No Image Caption available');
         case 401:
-          return 'No Image Caption available';
+          return const Tuple2(
+              'No Image Caption available', 'No Image Caption available');
         case 403:
-          return 'No Image Caption available';
+          return const Tuple2(
+              'No Image Caption available', 'No Image Caption available');
         case 404:
-          return 'No Image Caption available';
+          return const Tuple2(
+              'No Image Caption available', 'No Image Caption available');
         case 500:
-          return 'No Image Caption available';
+          return const Tuple2(
+              'No Image Caption available', 'No Image Caption available');
         default:
-          return 'No Image Caption available';
+          return const Tuple2(
+              'No Image Caption available', 'No Image Caption available');
       }
     } catch (e) {
       if (e is DioException) {
-        print('DioError: ${e.response?.statusCode}');
-        // Hata durumunda özel işlem
         if (e.response?.statusCode == 500) {
-          print('Sunucu tarafında bir hata oluştu.');
+          throw 'Server error, The server encountered an internal error and was unable to complete the request.';
         }
       }
-      return 'Server error, The server encountered an internal error and was unable to complete the request. $e';
-    }
-  }
-
-  Future<String> getLongImageCaption({
-    required String imagePath,
-    String dest = 'en',
-    String descriptionType = 'long',
-  }) async {
-    var data = FormData.fromMap({
-      'api_key': _weAccess.apiKey,
-      'image_url': imagePath,
-      'lang': dest,
-      'create_types': ['desc']
-    });
-
-    try {
-      var response = await dio.request(
-        'wephoto-create/',
-        options: Options(
-          method: 'POST',
-        ),
-        data: data,
-        cancelToken: _cancelToken,
-      );
-
-      switch (response.statusCode) {
-        case 200 || 201 || 202 || 203 || 204:
-          final outputList = response.data['image_desc'] as List?;
-          if (outputList != null) {
-            return outputList[0] ?? 'No Image Caption available';
-          }
-          return 'No Image Caption available';
-        case 400:
-          return 'No Image Caption available';
-        case 401:
-          return 'No Image Caption available';
-        case 403:
-          return 'No Image Caption available';
-        case 404:
-          return 'No Image Caption available';
-        case 500:
-          return 'No Image Caption available';
-        default:
-          return 'No Image Caption available';
-      }
-    } catch (e) {
-      throw 'Server error: The server encountered an internal error and was unable to complete the request.';
+      throw 'Server error, The server encountered an internal error and was unable to complete the request. $e';
     }
   }
 
@@ -143,12 +103,17 @@ class ApiServices {
         data: data,
         cancelToken: _cancelToken,
       );
+      print(response.data);
       switch (response.statusCode) {
         case 200 || 201 || 202 || 203 || 204:
-          final altOutputList = response.data['image_alt_text'] as List?;
-          final descOutputList = response.data['image_desc'] as List?;
-          return Tuple2(altOutputList?[0] ?? 'No Image Caption available',
-              descOutputList?[0] ?? 'No Image Caption available');
+          if (response.data['image_alt_text'] == 'Gateway error' ||
+              response.data['image_desc'] == 'Gateway error') {
+            return const Tuple2(
+                'No Image Caption available', 'No Image Caption available');
+          }
+          return Tuple2(
+              response.data['image_alt_text'] ?? 'No Image Caption available',
+              response.data['image_desc'] ?? 'No Image Caption available');
         case 400:
           return const Tuple2(
               'No Image Caption available', 'No Image Caption available');

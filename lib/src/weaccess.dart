@@ -11,6 +11,7 @@ class WeAccess {
   static final WeAccess _instance = WeAccess._internal();
   late String _apiKey;
   bool _isInitialized = false;
+  bool _activeLogger = false;
 
   factory WeAccess() {
     return _instance;
@@ -25,8 +26,9 @@ class WeAccess {
   /// [apiKey] is the API key provided by WeAccess.
   ///
   /// This function [WidgetsFlutterBinding.ensureInitialized] contains.
-  static Future<void> init({required String apiKey}) async {
+  static Future<void> init({required String apiKey, bool? activeLogger}) async {
     _instance._apiKey = apiKey;
+    _instance._activeLogger = activeLogger ?? false;
     _instance._isInitialized = true;
     WidgetsFlutterBinding.ensureInitialized();
     await _initializeHiveBox();
@@ -54,6 +56,7 @@ class WeAccess {
   }
 
   static bool get isInitialized => _instance._isInitialized;
+  static bool get activeLogger => _instance._activeLogger;
 
   String get apiKey {
     if (!_isInitialized) {

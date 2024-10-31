@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:weaccess/src/wephoto/constant/package_constant.dart';
@@ -38,12 +39,6 @@ class _WePhotoState extends State<WePhoto> {
     return ValueListenableBuilder(
         valueListenable: kListenableBox,
         builder: (context, Box<URLDataModel> box, child) {
-          if (widget.controller?.description != '') {
-            widget.controller?.setDescription(
-              WePhotoService.getImageCaption(
-                  box, widget.image, widget.descriptionType),
-            );
-          }
           return Semantics(
             key: widget.semanticsProperties?.key,
             attributedDecreasedValue:
@@ -77,7 +72,11 @@ class _WePhotoState extends State<WePhoto> {
                 ? null
                 : widget.semanticsProperties?.label ??
                     WePhotoService.getImageCaption(
-                        box, widget.image, widget.descriptionType),
+                      box,
+                      widget.image,
+                      widget.descriptionType,
+                      controller: widget.controller,
+                    ),
             liveRegion: widget.semanticsProperties?.liveRegion,
             maxValueLength: widget.semanticsProperties?.maxValueLength,
             mixed: widget.semanticsProperties?.mixed,

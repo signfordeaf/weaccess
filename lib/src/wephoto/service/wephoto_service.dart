@@ -1,19 +1,15 @@
-import 'dart:io';
+// ignore_for_file: invalid_use_of_protected_member
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:path/path.dart' as p;
 import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:weaccess/src/wephoto/constant/package_constant.dart';
 import 'package:weaccess/src/wephoto/data/url_data_model.dart';
 import 'package:weaccess/src/wephoto/service/visual_representation_service.dart';
+import 'package:weaccess/src/wephoto/service/wephoto_controller_service.dart';
 import 'package:weaccess/src/wephoto/utils/wephoto_controller.dart';
 
 class WePhotoService {
-  static late VisualRepresentationService _visualRepresentationService;
-
   static void processToImage(ImageProvider image) {
     _processToImage(image);
   }
@@ -24,23 +20,56 @@ class WePhotoService {
 
   static void addDescriptionToController(
       WePhotoController? controller, String description) {
-    if (controller != null) {
-      controller.setDescription(description);
-    }
+    if (controller != null) {}
   }
 
   static String getImageCaption(
-      Box<URLDataModel> box, ImageProvider image, String descriptionType) {
-    if (image is AssetImage) {}
+      Box<URLDataModel> box, ImageProvider image, String descriptionType,
+      {WePhotoController? controller}) {
+    if (image is AssetImage) {
+      final imagePath = image.assetName;
+      final urlDataModel = box.get(imagePath);
+      if (urlDataModel != null) {
+        if (controller != null) {
+          _fillControllerDescription(
+            controller,
+            urlDataModel.shortImageCaption ?? '',
+            urlDataModel.longImageCaption ?? '',
+          );
+        }
+        return descriptionType == 'short'
+            ? urlDataModel.shortImageCaption ?? ''
+            : urlDataModel.longImageCaption ?? '';
+      }
+    }
     if (image is NetworkImage) {
       final imageUrl = image.url;
       final urlDataModel = box.get(imageUrl);
 
       if (urlDataModel != null) {
-        return urlDataModel.shortImageCaption ?? '';
+        if (controller != null) {
+          _fillControllerDescription(
+            controller,
+            urlDataModel.shortImageCaption ?? '',
+            urlDataModel.longImageCaption ?? '',
+          );
+        }
+        return descriptionType == 'short'
+            ? urlDataModel.shortImageCaption ?? ''
+            : urlDataModel.longImageCaption ?? '';
       }
     }
     return 'No Image Caption available';
+  }
+
+  static void _fillControllerDescription(
+    WePhotoController controller,
+    String imageUrl,
+    String shortDescription,
+    String longDescription,
+  ) {
+    controller.fetchDescription(shortDescription, type: DescriptionType.short);
+    controller.fetchDescription(longDescription, type: DescriptionType.long);
   }
 
   static void _processToImage(ImageProvider image) {
@@ -72,8 +101,7 @@ class WePhotoService {
       );
     }
     kURLBox.put(urlDataModel.imageUrl, urlDataModel);
-    _visualRepresentationService = VisualRepresentationService();
-    _visualRepresentationService.addUrlImageData(urlDataModel);
+    VisualRepresentationService.instance.startService();
   }
 
   static void _saveImageToCacheFile(String imagePath) async {
@@ -88,25 +116,8 @@ class WePhotoService {
         longImageCaption: existingUrls.first.longImageCaption,
       );
     }
-
     kURLBox.put(urlDataModel.imageUrl, urlDataModel);
-    final imageFile = await assetImageToFile(imagePath);
-    _visualRepresentationService = VisualRepresentationService();
-    _visualRepresentationService.addFileImageData(
-        data: urlDataModel, file: imageFile);
-  }
-
-  static Future<File> assetImageToFile(String imagePath) async {
-    final Directory directory = await getTemporaryDirectory();
-    final String path = '${directory.path}/wephoto';
-    final Directory wephotoDirectory = Directory(path);
-    if (!(await wephotoDirectory.exists())) {
-      await wephotoDirectory.create(recursive: true);
-    }
-    ByteData byteData = await rootBundle.load(imagePath);
-    Uint8List uint8list = byteData.buffer.asUint8List();
-    final File file = File('$path/${p.basename(imagePath)}');
-    return await file.writeAsBytes(uint8list);
+    VisualRepresentationService.instance.startService();
   }
 
   static void _clearCache() {
@@ -114,6 +125,6 @@ class WePhotoService {
   }
 
   static void dispose() {
-    _visualRepresentationService.dispose();
+    VisualRepresentationService.instance.dispose();
   }
 }
