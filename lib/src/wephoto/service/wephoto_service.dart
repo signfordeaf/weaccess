@@ -6,7 +6,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:weaccess/src/wephoto/constant/package_constant.dart';
 import 'package:weaccess/src/wephoto/data/url_data_model.dart';
 import 'package:weaccess/src/wephoto/service/visual_representation_service.dart';
-import 'package:weaccess/src/wephoto/service/wephoto_controller_service.dart';
 import 'package:weaccess/src/wephoto/utils/wephoto_controller.dart';
 
 class WePhotoService {
@@ -31,11 +30,7 @@ class WePhotoService {
       final urlDataModel = box.get(imagePath);
       if (urlDataModel != null) {
         if (controller != null) {
-          _fillControllerDescription(
-            controller,
-            urlDataModel.shortImageCaption ?? '',
-            urlDataModel.longImageCaption ?? '',
-          );
+          _fillControllerDescription(controller, urlDataModel);
         }
         return descriptionType == 'short'
             ? urlDataModel.shortImageCaption ?? ''
@@ -48,11 +43,7 @@ class WePhotoService {
 
       if (urlDataModel != null) {
         if (controller != null) {
-          _fillControllerDescription(
-            controller,
-            urlDataModel.shortImageCaption ?? '',
-            urlDataModel.longImageCaption ?? '',
-          );
+          _fillControllerDescription(controller, urlDataModel);
         }
         return descriptionType == 'short'
             ? urlDataModel.shortImageCaption ?? ''
@@ -64,12 +55,9 @@ class WePhotoService {
 
   static void _fillControllerDescription(
     WePhotoController controller,
-    String imageUrl,
-    String shortDescription,
-    String longDescription,
+    URLDataModel data,
   ) {
-    controller.fetchDescription(shortDescription, type: DescriptionType.short);
-    controller.fetchDescription(longDescription, type: DescriptionType.long);
+    controller.fetchDescription(data);
   }
 
   static void _processToImage(ImageProvider image) {
